@@ -2,13 +2,20 @@
 
     {{-- ===================== HEADER ===================== --}}
     <div class="d-flex justify-content-between align-items-center mb-4 p-3 shadow-sm rounded bg-white border border-light">
-        <h4 class="fw-bold text-primary m-0">
-            <i class="bi bi-journal-text me-2"></i> Catatan Keuangan
-        </h4>
-        <a href="{{ route('app.finances.create') }}" class="btn btn-primary shadow-sm px-4" wire:navigate>
+    <h4 class="fw-bold text-primary m-0">
+        <i class="bi bi-journal-text me-2"></i> Catatan Keuangan
+    </h4>
+
+    <div class="d-flex gap-2">
+        <a href="{{ route('app.finances.create') }}" class="btn btn-primary shadow-sm px-3" wire:navigate>
             <i class="bi bi-plus-circle me-1"></i> Tambah
         </a>
+        <button wire:click="logout" class="btn btn-outline-danger shadow-sm px-3">
+            <i class="bi bi-box-arrow-right me-1"></i> Logout
+        </button>
     </div>
+</div>
+
 
     {{-- ===================== FILTER & SEARCH ===================== --}}
     <div class="row g-2 mb-4">

@@ -79,6 +79,15 @@ class FinanceIndex extends Component
 
         $this->resetPage();
     }
+    public function logout()
+{
+    \Illuminate\Support\Facades\Auth::logout();
+    session()->invalidate();
+    session()->regenerateToken();
+
+    return redirect()->route('auth.login');
+}
+
 
     /** 📈 Data untuk chart (PostgreSQL aman) */
     protected function getChartData(): array

@@ -74,11 +74,21 @@
                 </div>
 
                 {{-- ===================== SUBMIT ===================== --}}
-                <div class="text-end mt-4">
-                    <button type="button" id="saveBtn" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
-                        <i class="bi bi-save me-1"></i>{{ $finance_id ? 'Update' : 'Simpan' }}
-                    </button>
-                </div>
+              <div class="text-end mt-4">
+    <button type="submit"
+            wire:loading.attr="disabled"
+            wire:target="save, new_cover"
+            class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
+        <span wire:loading.remove wire:target="save">
+            <i class="bi bi-save me-1"></i>{{ $finance_id ? 'Update' : 'Simpan' }}
+        </span>
+        <span wire:loading wire:target="save">
+            <i class="bi bi-hourglass-split me-1"></i> Menyimpan...
+        </span>
+    </button>
+</div>
+
+
             </form>
         </div>
     </div>
@@ -110,15 +120,17 @@
 document.addEventListener('livewire:init', () => {
     // === SweetAlert sukses dari backend ===
     Livewire.on('swal:success', data => {
-        Swal.fire({
-            icon: 'success',
-            title: data.title || 'Berhasil!',
-            text: data.text || 'Data berhasil disimpan.',
-            confirmButtonColor: '#0d6efd',
-            timer: 1500,
-            showConfirmButton: false
-        });
+    Swal.fire({
+        icon: 'success',
+        title: data.title,
+        text: data.text,
+        confirmButtonColor: '#0d6efd',
+        timer: 1500,
+        showConfirmButton: false
+    }).then(() => {
+        window.location.href = '{{ route("app.finances.index") }}';
     });
+});
 
     // === Konfirmasi sebelum submit ===
     document.getElementById('saveBtn').addEventListener('click', () => {

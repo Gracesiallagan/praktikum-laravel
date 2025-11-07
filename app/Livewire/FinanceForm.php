@@ -27,7 +27,8 @@ class FinanceForm extends Component
         'amount'      => 'required|numeric|min:0',
         'date'        => 'required|date',
         'description' => 'nullable|string',
-        'new_cover'   => 'nullable|image|max:2048',
+        'new_cover'   => 'nullable|image|max:5120',
+
     ];
 
     /**

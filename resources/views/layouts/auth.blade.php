@@ -1,33 +1,45 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-
 <head>
-    {{-- Meta --}}
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    {{-- Icon --}}
-    <link rel="icon" href="/logo.png" type="image/x-icon" />
-
-    {{-- Judul --}}
-    <title>Laravel Todolist</title>
-
-    {{-- Styles --}}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth | Catatan Keuangan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     @livewireStyles
-    <link rel="stylesheet" href="/assets/vendor/bootstrap-5.3.8-dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e3f2fd, #ffffff);
+            font-family: 'Poppins', sans-serif;
+        }
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+            animation: fadeIn .4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+    </style>
 </head>
-
-<body class="bg-light">
-    <div class="container-fluid mt-5">
-        @yield('content')
+<body>
+    <div class="auth-container">
+        <div class="col-md-5 col-lg-4">
+            {{-- Konten dari Livewire akan ditaruh di sini --}}
+            {{ $slot }}
+        </div>
     </div>
 
-    {{-- Scripts --}}
     @livewireScripts
-    <link rel="stylesheet" href="/assets/vendor/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @stack('scripts')
 </body>
-
 </html>

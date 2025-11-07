@@ -38,7 +38,7 @@
         </form>
 
         <p class="text-center mt-3">
-            Sudah punya akun? <a href="{{ route('auth.login') }}">Login di sini</a>
+            Sudah punya akun? <a href="{{ route('auth.login') }}">Login</a>
         </p>
     </div>
 </div>

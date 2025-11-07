@@ -17,7 +17,6 @@ class FinanceIndex extends Component
     public $perPage = 20;
     public $deleteId;
 
-    // Listener untuk event dari JavaScript
     protected $listeners = ['deleteConfirmed' => 'delete'];
 
     public function updatingSearch()
@@ -25,27 +24,32 @@ class FinanceIndex extends Component
         $this->resetPage();
     }
 
-    public function render()
-    {
-        $query = Finance::where('user_id', Auth::id())
-            ->when($this->search, fn($q) => $q->where('title', 'like', "%{$this->search}%"))
-            ->when($this->filterType, fn($q) => $q->where('type', $this->filterType))
-            ->latest();
+  public function render()
+{
+    $query = Finance::where('user_id', Auth::id())
+        ->when($this->search, fn($q) =>
+            $q->where('title', 'ILIKE', "%{$this->search}%") // agar tidak case-sensitive di PostgreSQL
+        )
+        ->when($this->filterType !== '', fn($q) =>
+            $q->where('type', $this->filterType)
+        )
+        ->orderByDesc('date');
 
-        $finances = $query->paginate($this->perPage);
-        $chartData = $this->getChartData();
+    // ✅ Pagination 20 data per halaman (sudah dari $perPage)
+    $finances = $query->paginate($this->perPage);
 
-        return view('livewire.finance-index', compact('finances', 'chartData'))
-               ->layout('layouts.app');
-    }
+    // ✅ Grafik tetap bekerja seperti semula
+    $chartData = $this->getChartData();
 
-    /**
-     * Panggil SweetAlert konfirmasi
-     */
+    return view('livewire.finance-index', compact('finances', 'chartData'))
+        ->layout('layouts.app');
+}
+
+
+    /** 🔥 Konfirmasi hapus data */
     public function confirmDelete($id)
     {
         $this->deleteId = $id;
-
         $this->dispatch('swal:confirm', [
             'id' => $id,
             'title' => 'Hapus Data?',
@@ -53,35 +57,20 @@ class FinanceIndex extends Component
         ]);
     }
 
-    /**
-     * Eksekusi penghapusan setelah konfirmasi
-     */
+    /** 🗑️ Eksekusi hapus data setelah konfirmasi */
     public function delete($payload = null)
     {
-        $id = null;
-
-        // Ambil ID dari berbagai kemungkinan format event
-        if (is_array($payload) && isset($payload['id'])) {
-            $id = $payload['id'];
-        } elseif (is_object($payload) && isset($payload->id)) {
-            $id = $payload->id;
-        } elseif (is_scalar($payload)) {
-            $id = $payload;
-        } elseif ($this->deleteId) {
-            $id = $this->deleteId;
-        }
+        $id = $payload['id'] ?? $payload->id ?? $payload ?? $this->deleteId;
 
         if (!$id) {
             $this->dispatch('swal:success', [
                 'title' => 'Gagal!',
-                'text' => 'ID tidak ditemukan.',
+                'text'  => 'ID tidak ditemukan.',
             ]);
             return;
         }
 
-        Finance::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->delete();
+        Finance::where('id', $id)->where('user_id', Auth::id())->delete();
 
         $this->dispatch('swal:success', [
             'title' => 'Berhasil!',
@@ -91,12 +80,12 @@ class FinanceIndex extends Component
         $this->resetPage();
     }
 
-    /**
-     * Ambil data untuk chart (agar tidak error di Postgres)
-     */
+    /** 📈 Data untuk chart (PostgreSQL aman) */
     protected function getChartData(): array
     {
-        $col = Schema::hasColumn('finances', 'transaction_date') ? 'transaction_date' : 'created_at';
+        $col = Schema::hasColumn('finances', 'date')
+            ? 'date'
+            : (Schema::hasColumn('finances', 'transaction_date') ? 'transaction_date' : 'created_at');
 
         $data = Finance::selectRaw("
             extract(month from \"$col\")::int as month,
@@ -110,11 +99,15 @@ class FinanceIndex extends Component
         ->get();
 
         if ($data->isEmpty()) {
-            return ['months' => [], 'income' => [], 'expense' => []];
+            return [
+                'months' => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                'income' => array_fill(0, 12, 0),
+                'expense' => array_fill(0, 12, 0),
+            ];
         }
 
         return [
-            'months' => $data->pluck('month')->map(fn($m) => date('M', mktime(0,0,0,$m,1)))->toArray(),
+            'months' => $data->pluck('month')->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray(),
             'income' => $data->pluck('income')->toArray(),
             'expense' => $data->pluck('expense')->toArray(),
         ];
